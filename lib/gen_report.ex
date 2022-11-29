@@ -1,5 +1,14 @@
 defmodule GenReport do
   alias GenReport.Parser
+  alias GenReport.SumReports
+
+  def build_from_many(filenames) when not is_list(filenames), do: {:error, "Please proide a list of string"}
+
+  def build_from_many(filenames) do
+    filenames
+    |> Task.async_stream(&build/1)
+    |> Enum.reduce(%{}, fn {:ok, result}, report -> SumReports.sum(result, report) end)
+  end
 
   def build(filename) do
     filename
